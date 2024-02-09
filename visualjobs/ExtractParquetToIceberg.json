@@ -1,0 +1,43 @@
+{
+  "name" : "ExtractParquetToIceberg",
+  "jobMode" : "VISUAL",
+  "description" : "",
+  "role" : "arn:aws:iam::562760952310:role/service-role/AWSGlueServiceRole",
+  "executionProperty" : {
+    "maxConcurrentRuns" : 1
+  },
+  "command" : {
+    "name" : "glueetl",
+    "scriptLocation" : "s3://aws-glue-assets-562760952310-eu-central-1/scripts/Extract.py",
+    "pythonVersion" : "3"
+  },
+  "defaultArguments" : {
+    "--enable-metrics" : "true",
+    "--enable-spark-ui" : "true",
+    "--spark-event-logs-path" : "s3://aws-glue-assets-562760952310-eu-central-1/sparkHistoryLogs/",
+    "--enable-job-insights" : "false",
+    "--enable-observability-metrics" : "true",
+    "--conf" : "spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions --conf spark.sql.catalog.glue_catalog=org.apache.iceberg.spark.SparkCatalog --conf spark.sql.catalog.glue_catalog.catalog-impl=org.apache.iceberg.aws.glue.GlueCatalog --conf spark.sql.catalog.glue_catalog.io-impl=org.apache.iceberg.aws.s3.S3FileIO --conf spark.sql.catalog.glue_catalog.warehouse=file:///tmp/spark-warehouse",
+    "--enable-glue-datacatalog" : "true",
+    "--enable-continuous-cloudwatch-log" : "true",
+    "--job-bookmark-option" : "job-bookmark-disable",
+    "--datalake-formats" : "iceberg",
+    "--job-language" : "python",
+    "--TempDir" : "s3://aws-glue-assets-562760952310-eu-central-1/temporary/"
+  },
+  "maxRetries" : 0,
+  "allocatedCapacity" : 10,
+  "timeout" : 2880,
+  "maxCapacity" : 10.0,
+  "glueVersion" : "4.0",
+  "numberOfWorkers" : 10,
+  "workerType" : "G.1X",
+  "executionClass" : "STANDARD",
+  "codeGenConfigurationNodes" : "{\"node-1707485802817\":{\"DropFields\":{\"Inputs\":[\"node-1707485779171\"],\"Name\":\"Drop Fields\",\"Paths\":[]}},\"node-1707485858951\":{\"S3IcebergDirectTarget\":{\"AdditionalOptions\":{},\"Compression\":\"gzip\",\"Format\":\"iceberg\",\"Inputs\":[\"node-1707485802817\"],\"Name\":\"Amazon S3\",\"PartitionKeys\":[],\"Path\":\"s3://db-cargo-glue-plattform-results/iceberg/\",\"SchemaChangePolicy\":{\"Database\":\"dbcargodb\",\"EnableUpdateCatalog\":true,\"Table\":\"iceberg_target\",\"UpdateBehavior\":\"LOG\"}}},\"node-1707485639617\":{\"CatalogSource\":{\"Database\":\"dbcargodb\",\"Name\":\"AWS Glue Data Catalog\",\"Table\":\"source_stocksparquet\"}},\"node-1707485779171\":{\"DropDuplicates\":{\"Columns\":[],\"Inputs\":[\"node-1707485639617\"],\"Name\":\"Drop Duplicates\"}}}",
+  "sourceControlDetails" : {
+    "provider" : "GITHUB",
+    "repository" : "dbcargo_pipeline_test",
+    "branch" : "dev",
+    "folder" : "visualjobs"
+  }
+}
