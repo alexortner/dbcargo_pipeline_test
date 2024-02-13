@@ -1,0 +1,43 @@
+{
+  "name" : "3_convert_parquet_to_iceberg",
+  "jobMode" : "VISUAL",
+  "description" : "",
+  "role" : "arn:aws:iam::562760952310:role/service-role/AWSGlueServiceRole",
+  "executionProperty" : {
+    "maxConcurrentRuns" : 1
+  },
+  "command" : {
+    "name" : "glueetl",
+    "scriptLocation" : "s3://aws-glue-assets-562760952310-eu-central-1/scripts/3_convert_parquet_to_iceberg.py",
+    "pythonVersion" : "3"
+  },
+  "defaultArguments" : {
+    "--enable-metrics" : "true",
+    "--enable-spark-ui" : "true",
+    "--spark-event-logs-path" : "s3://aws-glue-assets-562760952310-eu-central-1/sparkHistoryLogs/",
+    "--enable-job-insights" : "false",
+    "--enable-observability-metrics" : "true",
+    "--conf" : "spark.sql.extensions=org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions --conf spark.sql.catalog.glue_catalog=org.apache.iceberg.spark.SparkCatalog --conf spark.sql.catalog.glue_catalog.catalog-impl=org.apache.iceberg.aws.glue.GlueCatalog --conf spark.sql.catalog.glue_catalog.io-impl=org.apache.iceberg.aws.s3.S3FileIO --conf spark.sql.catalog.glue_catalog.warehouse=file:///tmp/spark-warehouse",
+    "--enable-glue-datacatalog" : "true",
+    "--enable-continuous-cloudwatch-log" : "true",
+    "--job-bookmark-option" : "job-bookmark-disable",
+    "--datalake-formats" : "iceberg",
+    "--job-language" : "python",
+    "--TempDir" : "s3://aws-glue-assets-562760952310-eu-central-1/temporary/"
+  },
+  "maxRetries" : 0,
+  "allocatedCapacity" : 2,
+  "timeout" : 2880,
+  "maxCapacity" : 2.0,
+  "glueVersion" : "4.0",
+  "numberOfWorkers" : 2,
+  "workerType" : "G.1X",
+  "executionClass" : "STANDARD",
+  "codeGenConfigurationNodes" : "{\"node-1707829482872\":{\"S3IcebergCatalogTarget\":{\"AdditionalOptions\":{},\"Database\":\"dbcargo\",\"Inputs\":[\"node-1707830715783\"],\"Name\":\"Write Bronze Wagon Data\",\"PartitionKeys\":[],\"Table\":\"wagon_data_iceberg\"}},\"node-1707830915724\":{\"EvaluateDataQualityMultiFrame\":{\"AdditionalDataSources\":{},\"AdditionalOptions\":{\"performanceTuning.caching\":\"CACHE_NOTHING\"},\"Inputs\":[\"node-1707830626412\"],\"Name\":\"Evaluate Data Quality (Multiframe)\",\"PublishingOptions\":{\"CloudWatchMetricsEnabled\":true,\"ResultsPublishingEnabled\":true,\"ResultsS3Prefix\":\"\"},\"Ruleset\":\"# Example rules: Completeness \\\"colA\\\" between 0.4 and 0.8, ColumnCount > 10\\nRules = [\\n# checke ob die falsche leergewicht<lastgrenze kleiner als 1%\\nCustomSql \\\"select leergewicht, lastgrenze from primary where leergewicht > lastgrenze\\\" with threshold < 0.01\\n]\",\"StopJobOnFailureOptions\":{}}},\"node-1707830626412\":{\"SparkSQL\":{\"Inputs\":[\"node-1707827959916\"],\"Name\":\"Filter invalid rows\",\"OutputSchemas\":[{\"Columns\":[{\"Name\":\"wagon_id\",\"Type\":\"int\"},{\"Name\":\"hersteller\",\"Type\":\"string\"},{\"Name\":\"gattung\",\"Type\":\"string\"},{\"Name\":\"typ\",\"Type\":\"string\"},{\"Name\":\"ladelänge\",\"Type\":\"int\"},{\"Name\":\"ladehöhe\",\"Type\":\"float\"},{\"Name\":\"ladefläche\",\"Type\":\"int\"},{\"Name\":\"laderaum\",\"Type\":\"int\"},{\"Name\":\"leergewicht\",\"Type\":\"float\"},{\"Name\":\"lastgrenze\",\"Type\":\"float\"},{\"Name\":\"inbetriebnahme\",\"Type\":\"string\"}]}],\"SqlAliases\":[{\"Alias\":\"md\",\"From\":\"node-1707827959916\"}],\"SqlQuery\":\"select * from md \\nwhere wagon_id is not null\"}},\"node-1707736942579\":{\"CatalogSource\":{\"Database\":\"dbcargo\",\"Name\":\"Read Raw Wagon Data\",\"Table\":\"wagon_data_rawwagon_data\"}},\"node-1707828011560\":{\"S3IcebergCatalogTarget\":{\"AdditionalOptions\":{},\"Database\":\"dbcargo\",\"Inputs\":[\"node-1707830626412\"],\"Name\":\"Write Bronze Master Data Iceberg\",\"PartitionKeys\":[],\"Table\":\"master_data_iceberg\"}},\"node-1707830715783\":{\"SparkSQL\":{\"Inputs\":[\"node-1707736942579\"],\"Name\":\"Filter invalid rows\",\"OutputSchemas\":[{\"Columns\":[{\"Name\":\"unique_id\",\"Type\":\"int\"},{\"Name\":\"wagon_id\",\"Type\":\"int\"},{\"Name\":\"measure_timestamp\",\"Type\":\"string\"},{\"Name\":\"measure_lat\",\"Type\":\"float\"},{\"Name\":\"measure_long\",\"Type\":\"float\"},{\"Name\":\"measure_wagon_weight\",\"Type\":\"float\"},{\"Name\":\"measure_temperature\",\"Type\":\"float\"},{\"Name\":\"measure_gps_signal_quality\",\"Type\":\"int\"},{\"Name\":\"measure_device_parameter_1\",\"Type\":\"string\"},{\"Name\":\"measure_device_parameter_2\",\"Type\":\"int\"}]}],\"SqlAliases\":[{\"Alias\":\"wd\",\"From\":\"node-1707736942579\"}],\"SqlQuery\":\"select * from wd \\nwhere wagon_id is not null\\nand measure_timestamp is not null\"}},\"node-1707827959916\":{\"CatalogSource\":{\"Database\":\"dbcargo\",\"Name\":\"Read Raw Master Data\",\"Table\":\"master_data_rawmaster_data\"}}}",
+  "sourceControlDetails" : {
+    "provider" : "GITHUB",
+    "repository" : "dbcargo_pipeline_test",
+    "branch" : "dev",
+    "folder" : "jobs/2_covert_parquet_iceberg"
+  }
+}
